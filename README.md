@@ -40,6 +40,16 @@ pip install -r requirements.txt
    ```
 3. `.env` niemals committen – sie ist in `.gitignore` ausgeschlossen.
 
+**Optionale Trainingsparameter** (Defaults greifen, wenn nicht gesetzt – siehe `config.py`):
+
+| Variable | Default | Bedeutung |
+| --- | --- | --- |
+| `PENDELSTRECKE_KM` | `36` | Tägliche Pendelstrecke (hin & zurück) in km |
+| `TRAININGSEINHEITEN_PRO_WOCHE` | `2` | Anzahl strukturierter Einheiten, die pro Review vorgeschlagen werden |
+| `FTP_STARTWERT` | `280` | Fallback-FTP in Watt, falls intervals.icu keinen eFTP-Wert liefert |
+| `TRAININGSMETHODIK` | `sweet_spot` | Label der verfolgten Trainingsmethodik (aktuell nur informativ, Workout-Generierung ist Sweet-Spot) |
+| `TRAININGSZIEL` | *(leer)* | Freitext-Trainingsziel, wird im Review-Output angezeigt |
+
 **Mehrere Personen/Profile:** Es ist jeweils nur ein Profil gleichzeitig aktiv. Für ein zweites Profil eine weitere Datei anlegen (z. B. `.env.michael`) und bei Bedarf manuell anstelle von `.env` einsetzen (`.env` vorher sichern, z. B. als `.env.johannes`). Alle `.env*`-Dateien außer `.env.example` sind von Git ausgeschlossen.
 
 ## Ausführung

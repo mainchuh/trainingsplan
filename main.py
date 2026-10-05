@@ -3,6 +3,7 @@ import random
 import sys
 from datetime import date, timedelta
 
+import config
 from intervals_client import IntervalsClient
 
 STRENGTH_TIPS = [
@@ -18,7 +19,8 @@ NUTRITION_TIPS = [
 ]
 
 
-def extract_eftp(wellness_records, fallback=280):
+def extract_eftp(wellness_records, fallback=None):
+    fallback = fallback if fallback is not None else config.FTP_STARTWERT
     for record in reversed(wellness_records):
         for sport in record.get("sportInfo") or []:
             if sport.get("type") == "Ride" and sport.get("eftp"):
@@ -49,9 +51,10 @@ def classify_form(tsb, sleep_hours):
     return "neutral"
 
 
-def build_sweet_spot_workouts(form):
+def build_sweet_spot_workouts(form, count=None):
+    count = count if count is not None else config.TRAININGSEINHEITEN_PRO_WOCHE
     if form == "muede":
-        return [
+        templates = [
             {
                 "name": "Sweet Spot - reduziert",
                 "steps": [(10, "55-65")] + [(10, "88-93"), (3, "50")] * 2 + [(10, "55-65")],
@@ -61,8 +64,8 @@ def build_sweet_spot_workouts(form):
                 "steps": [(60, "60-70")],
             },
         ]
-    if form == "frisch":
-        return [
+    elif form == "frisch":
+        templates = [
             {
                 "name": "Sweet Spot",
                 "steps": [(10, "55-65")] + [(14, "90-95"), (4, "50")] * 3 + [(10, "55-65")],
@@ -72,16 +75,18 @@ def build_sweet_spot_workouts(form):
                 "steps": [(10, "55-65")] + [(12, "90-95"), (3, "50")] * 4 + [(10, "55-65")],
             },
         ]
-    return [
-        {
-            "name": "Sweet Spot",
-            "steps": [(10, "55-65")] + [(12, "88-94"), (3, "50")] * 3 + [(10, "55-65")],
-        },
-        {
-            "name": "Sweet Spot",
-            "steps": [(10, "55-65")] + [(10, "88-94"), (3, "50")] * 3 + [(10, "55-65")],
-        },
-    ]
+    else:
+        templates = [
+            {
+                "name": "Sweet Spot",
+                "steps": [(10, "55-65")] + [(12, "88-94"), (3, "50")] * 3 + [(10, "55-65")],
+            },
+            {
+                "name": "Sweet Spot",
+                "steps": [(10, "55-65")] + [(10, "88-94"), (3, "50")] * 3 + [(10, "55-65")],
+            },
+        ]
+    return [templates[i % len(templates)] for i in range(count)]
 
 
 def steps_to_description(steps):
@@ -108,6 +113,10 @@ def run_weekly_review():
     tsb = (ctl - atl) if ctl is not None and atl is not None else None
     sleep_hours = recent_sleep_hours(wellness_records)
     form = classify_form(tsb, sleep_hours)
+
+    if config.TRAININGSZIEL:
+        print(f"Trainingsziel: {config.TRAININGSZIEL}")
+    print(f"Pendelstrecke: {config.PENDELSTRECKE_KM:g} km, Methodik: {config.TRAININGSMETHODIK}\n")
 
     sleep_display = f"{sleep_hours:.1f}h" if sleep_hours is not None else "keine Daten"
     print(f"FTP: {ftp}W")
